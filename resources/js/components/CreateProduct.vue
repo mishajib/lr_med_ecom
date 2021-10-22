@@ -217,13 +217,14 @@ export default {
 
         // image upload handler
         imageUploadHandler(file) {
-            if (file.manuallyAdded === false) {
+            if (!file.hasOwnProperty('manuallyAdded')) {
                 this.images.push(file.dataURL);
             }
         },
 
         // store product into database
         saveProduct() {
+            console.log('saving...');
             let product = {
                 title                  : this.product_name,
                 sku                    : this.product_sku,
@@ -239,6 +240,21 @@ export default {
                 if (response.data.success === true) {
                     this.success = true;
                     this.success_message = response.data.message;
+
+                    this.product_name = '';
+                    this.product_sku = '';
+                    this.description = '';
+                    this.images = [];
+                    this.product_variant = [
+                        {
+                            option : this.variants[0].id,
+                            tags   : []
+                        }
+                    ];
+                    this.product_variant_prices = [];
+                    this.error = false;
+                    this.error_message = '';
+                    this.$refs.myVueDropzone.removeAllFiles();
                 }
             }).catch(error => {
                 if (error.response.data.hasOwnProperty('errors')) {
@@ -250,21 +266,6 @@ export default {
                     this.error = true;
                     this.error_message = error.response.data.message;
                 }
-            }).finally(() => {
-                this.product_name = '';
-                this.product_sku = '';
-                this.description = '';
-                this.images = [];
-                this.product_variant = [
-                    {
-                        option : this.variants[0].id,
-                        tags   : []
-                    }
-                ];
-                this.product_variant_prices = [];
-                this.error = false;
-                this.error_message = '';
-                this.$refs.myVueDropzone.removeAllFiles();
             });
 
             console.log(product);
